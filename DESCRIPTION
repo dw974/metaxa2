@@ -15,7 +15,8 @@ Imports:
     parallel,
     DECIPHER,
     BiocManager,
-    DECIPHER
+    DECIPHER,
+    Biostrings
 RoxygenNote: 7.0.0
 BiocViews:
     DECIPHER,

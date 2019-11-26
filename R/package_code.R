@@ -56,7 +56,7 @@ tax2metax <- function(tax=NULL,out=NULL){
 checkIDs <- function(metax=NULL,seq=NULL){
   tab=read.table(metax,sep="\t",colClasses = "character")
   colnames(tab)=c("ID","tax")
-  dna=readDNAStringSet(seq)
+  dna=Biostrings::readDNAStringSet(seq)
   names(dna)=gsub(" ","",names(dna))
   if (length(intersect(tab$ID,names(dna)))==length(tab$ID) & length(intersect(tab$ID,names(dna)))==length(names(dna))){
   print("Perfect match between IDs. Proceed to database construction.")
