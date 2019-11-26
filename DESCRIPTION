@@ -12,7 +12,8 @@ Imports:
     stringr,
     dplyr,
     pbapply,
-    parallel
+    parallel,
+    DECIPHER
 RoxygenNote: 7.0.0
 BiocViews:
     DECIPHER
