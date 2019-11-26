@@ -73,7 +73,7 @@ checkIDs <- function(metax=NULL,seq=NULL){
 #' @param list A character vector of files that you want to combine
 #' @param out the output combined file name
 combine_files <- function(list=NULL,out=NULL){
-  system(paste(c("cat",ls,">",out),collapse=" "))
+  system(paste(c("cat",list,">",out),collapse=" "))
 }
 
 #' Make a metaxa2 database
