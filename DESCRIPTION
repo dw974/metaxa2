@@ -14,3 +14,5 @@ Imports:
     pbapply,
     parallel
 RoxygenNote: 7.0.0
+BiocViews:
+    DECIPHER
