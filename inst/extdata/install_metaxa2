@@ -1,0 +1,111 @@
+#!/usr/bin/perl
+
+## This little neat script installs metaxa in the default way
+print "Metaxa2 Installer\n";
+print "-----------------\n";
+
+$homeDir = $ENV{"HOME"};
+
+print "Do you have superuser privileges? [yes/no, default = no]\n";
+chomp($su = <STDIN>);
+if (substr($su,0,1) eq "y") {
+  $su = 1;
+} else {
+  $su = 0;
+}
+
+if ($su == 1) {
+  print "Where do you want to install Metaxa2? [default = /usr/local/bin/]\n";
+  chomp($bindir = <STDIN>);
+  if ($bindir eq "") {
+    $bindir = "/usr/local/bin/";
+  }
+} else {
+  print "Where do you want to install Metaxa2? [default = $homeDir/bin/]\n";
+  chomp($bindir = <STDIN>);
+  if ($bindir eq "") {
+    $bindir = "$homeDir/bin/";
+  }
+}
+
+$bindir =~ s/\~/$homeDir/;
+
+print "Do you want to add $bindir to your PATH? [yes/no, default = yes]\n";
+chomp($su = <STDIN>);
+if (substr($su,0,1) eq "n") {
+  $pathWrite = 0;
+} else {
+  $pathWrite = 1;
+}
+
+chomp($errmsg = `ls $bindir 2>&1 >/dev/null`);
+if ($errmsg ne "") {
+  chomp($mkdirmsg = `mkdir $bindir 2>&1 >/dev/null`);
+  if ($mkdirmsg ne "") {
+    print "The specified directory does not exist, and could not be created. It is also possible that you do not have the privileges to write to it.\nTry rerunning the installer and choosing another directory.\nInstallation failed.\n";
+    exit;
+  }
+}
+
+print "Installing Metaxa2 in $bindir...\n";
+if ($su == 1) {
+  `sudo cp -r metaxa2* $bindir`;
+} else {
+  `cp -r metaxa2* $bindir`;
+}
+
+print "Preparing for Usearch support...\n";
+if ($su == 1) {
+  `sudo fastacmd -D 1 -d $bindir/metaxa2_db/SSU/blast -o $bindir/metaxa2_db/SSU/blast.fasta`;
+  `sudo fastacmd -D 1 -d $bindir/metaxa2_db/LSU/blast -o $bindir/metaxa2_db/LSU/blast.fasta`;
+} else {
+  `fastacmd -D 1 -d $bindir/metaxa2_db/SSU/blast -o $bindir/metaxa2_db/SSU/blast.fasta`;
+  `fastacmd -D 1 -d $bindir/metaxa2_db/LSU/blast -o $bindir/metaxa2_db/LSU/blast.fasta`;
+}
+
+
+print "Setting permissions...\n";
+if ($su == 1) {
+  `sudo chmod 755 $bindir/metaxa2`;
+  `sudo chmod 755 $bindir/metaxa2_x`;
+  `sudo chmod 755 $bindir/metaxa2_c`;
+  `sudo chmod 755 $bindir/metaxa2_ttt`;
+  `sudo chmod 755 $bindir/metaxa2_dc`;
+  `sudo chmod 755 $bindir/metaxa2_si`;
+  `sudo chmod 755 $bindir/metaxa2_rf`;
+  `sudo chmod 755 $bindir/metaxa2_uc`;
+} else {
+  `chmod 755 $bindir/metaxa2`;
+  `chmod 755 $bindir/metaxa2_x`;
+  `chmod 755 $bindir/metaxa2_c`;
+  `chmod 755 $bindir/metaxa2_ttt`;
+  `chmod 755 $bindir/metaxa2_dc`;
+  `chmod 755 $bindir/metaxa2_si`;
+  `chmod 755 $bindir/metaxa2_rf`;
+  `chmod 755 $bindir/metaxa2_uc`;
+}
+
+if (substr($bindir,-1) eq "/") {
+  $bindir = substr($bindir,0,-1);
+}
+
+if ($pathWrite == 1) {
+  print "Adding $bindir to your PATH...\n";
+  open (PROFILE, ">>$homeDir/.profile");
+  print PROFILE "\n";
+  print PROFILE "# Metaxa2 executables\n";
+  print PROFILE "export PATH=$bindir\:\$PATH\n";
+  print PROFILE "# End of Metaxa2 executables\n";
+  open (PROFILE, ">>$homeDir/.bash_profile");
+  print PROFILE "\n";
+  print PROFILE "# Metaxa2 executables\n";
+  print PROFILE "export PATH=$bindir\:\$PATH\n";
+  print PROFILE "# End of Metaxa executables\n";
+  close (PROFILE);
+  close (PROFILE);
+}
+
+
+print "Installation finished!\nNow, close this terminal and open a new one.\nYou can then test if the installation succeeded by typing 'metaxa2 --help'\n";
+  
+
