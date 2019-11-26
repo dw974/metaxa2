@@ -13,7 +13,10 @@ Imports:
     dplyr,
     pbapply,
     parallel,
+    DECIPHER,
+    BiocManager,
     DECIPHER
 RoxygenNote: 7.0.0
 BiocViews:
-    DECIPHER
+    DECIPHER,
+    Biostrings
