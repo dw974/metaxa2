@@ -1,11 +1,11 @@
 Package: metaxa2
 Type: Package
-Title: Provides a series of functions for updating the metaxa2 COI database
+Title: metaxa2 manipulation
 Version: 0.1.0
 Author: Dr David A Wilkinson
-Maintainer: dwilkin799@gmail.com
-Description: This package is essentially a bunch of wrapper functions for the use of Metaxa2
-License: open
+Maintainer: David Wilkinson <dwilkin799@gmail.com>
+Description: Provides a series of functions for updating the metaxa2 COI database
+License: GPL (>=2)
 Encoding: UTF-8
 LazyData: true
 Imports: 
