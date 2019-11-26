@@ -54,3 +54,11 @@ checkIDs <- function(metax=NULL,seq=NULL){
   print(setdiff(names(dna),tab$ID))
   }
 }
+
+combine_files <- function(list=NULL,out=NULL){
+  system(paste(c("cat",ls,">",out),collapse=" "))
+}
+
+make_db <- function(fasta=NULL,tax=NULL,out=NULL){
+
+}
