@@ -84,5 +84,12 @@ combine_files <- function(list=NULL,out=NULL){
 #' @param name The name to give to the database
 make_db <- function(fasta=NULL,tax=NULL,outdir=NULL,name=NULL){
   nc=parallel::detectCores()
-  system(paste0(system.file("extdata", "metaxa2_dbb", package = "metaxa2")," -i ",fasta," -t ",tax," --cpu ",nc-2," --plus -g ",outdir,"/",name," -o ",name))
+  system(paste0(system.file("extdata", "metaxa2_dbb", package = "metaxa2")," -e ",fasta," -t ",tax," --cpu ",nc-2," --plus -g ",outdir,"/",name," -o ",name))
+}
+
+#' Execute this function the first time you install the package
+#'
+setup_package <- function(){
+setwd(dirname(system.file("extdata", "metaxa2_dbb", package = "metaxa2")))
+system("find *m* -type f -exec chmod +x {} +")
 }
