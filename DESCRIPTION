@@ -13,3 +13,4 @@ Imports:
     dplyr,
     pbapply,
     parallel
+RoxygenNote: 7.0.0

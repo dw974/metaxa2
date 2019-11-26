@@ -4,6 +4,10 @@ library(pbapply)
 library(parallel)
 library(DECIPHER)
 
+#' Convert from Metaxa taxonomy format to a tabular, easy-to-read format
+#'
+#' @param metax File name: the file you wish to convert
+#' @param out File name: the output file
 metax2tax <- function(metax=NULL,out=NULL){
   tab=read.table(metax,sep="\t",colClasses = "character")
   colnames(tab)=c("ID","tax")
@@ -26,6 +30,11 @@ metax2tax <- function(metax=NULL,out=NULL){
   write.table(lst,out,sep="\t",quote = F,row.names = F)
 }
 
+
+#' Convert from tabular taxonomy file to a metaxa2-format taxonomy file
+#'
+#' @param tax File name: the file you wish to convert
+#' @param out File name: the output file
 tax2metax <- function(tax=NULL,out=NULL){
   tab=read.table(tax,sep="\t",header=T,colClasses = "character")
   nc=parallel::detectCores()
@@ -40,6 +49,10 @@ tax2metax <- function(tax=NULL,out=NULL){
   write.table(lst,out,sep="\t",quote = F,row.names = F,col.names = F)
 }
 
+#' Check matching IDs between metaxa2 taxonomy and fasta files
+#'
+#' @param metax File name: the metaxa2 taxonomy file
+#' @param seq The metaxa2 sequence file (fasta format)
 checkIDs <- function(metax=NULL,seq=NULL){
   tab=read.table(metax,sep="\t",colClasses = "character")
   colnames(tab)=c("ID","tax")
@@ -55,10 +68,20 @@ checkIDs <- function(metax=NULL,seq=NULL){
   }
 }
 
-combine_files <- function(list=NULL,outdir=NULL,name=NULL){
+#' Combine multiple fasta or taxonomy files into one
+#'
+#' @param list A character vector of files that you want to combine
+#' @param out the output combined file name
+combine_files <- function(list=NULL,out=NULL){
   system(paste(c("cat",ls,">",out),collapse=" "))
 }
 
+#' Make a metaxa2 database
+#'
+#' @param fasta The metaxa2 sequence data (fasta file)
+#' @param tax The metaxa2 taxonomy data
+#' @param outdir The directory to save the database into
+#' @param name The name to give to the database
 make_db <- function(fasta=NULL,tax=NULL,outdir=NULL,name=NULL){
   nc=parallel::detectCores()
   paste0(system.file("extdata", "metaxa2_dbb", package = "metaxa2")," -i ",fasta," -t ",tax," --cpu ",nc-2," --plus -g ",outdir,"/",name," -o ",name)
