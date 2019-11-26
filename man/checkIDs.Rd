@@ -14,3 +14,4 @@ checkIDs(metax = NULL, seq = NULL)
 \description{
 Check matching IDs between metaxa2 taxonomy and fasta files
 }
+\concept{functions}

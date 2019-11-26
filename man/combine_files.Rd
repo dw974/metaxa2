@@ -12,5 +12,5 @@ combine_files(list = NULL, out = NULL)
 \item{out}{the output combined file name}
 }
 \description{
-Combine multiple fasta or taxonomy files into one
+#' @family functions
 }

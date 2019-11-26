@@ -4,6 +4,7 @@ library(pbapply)
 library(parallel)
 library(DECIPHER)
 
+
 #' Convert from Metaxa taxonomy format to a tabular, easy-to-read format
 #'
 #' @param metax File name: the file you wish to convert
@@ -49,7 +50,8 @@ tax2metax <- function(tax=NULL,out=NULL){
   write.table(lst,out,sep="\t",quote = F,row.names = F,col.names = F)
 }
 
-#' Check matching IDs between metaxa2 taxonomy and fasta files
+
+#'  Check matching IDs between metaxa2 taxonomy and fasta files
 #'
 #' @param metax File name: the metaxa2 taxonomy file
 #' @param seq The metaxa2 sequence file (fasta format)
@@ -67,6 +69,8 @@ checkIDs <- function(metax=NULL,seq=NULL){
   print(setdiff(names(dna),tab$ID))
   }
 }
+
+
 
 #' Combine multiple fasta or taxonomy files into one
 #'
@@ -86,6 +90,7 @@ make_db <- function(fasta=NULL,tax=NULL,outdir=NULL,name=NULL){
   nc=parallel::detectCores()
   system(paste0(system.file("extdata", "metaxa2_dbb", package = "metaxa2")," -e ",fasta," -t ",tax," --cpu ",nc-2," --plus -g ",outdir,"/",name," -o ",name))
 }
+
 
 #' Execute this function the first time you install the package
 #'
