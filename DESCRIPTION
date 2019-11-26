@@ -13,8 +13,3 @@ Imports:
     dplyr,
     pbapply,
     parallel
-<<<<<<< HEAD
-=======
-biocViews:
-    DECIPHER
->>>>>>> 67f12d5a0294103c25cce57db7cb832cc3246664
