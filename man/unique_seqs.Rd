@@ -13,7 +13,5 @@ unique_seqs(list = NULL, outdir = NULL)
 }
 \description{
 The function also outputs the file "correspondence.tab", which details the correspondence between original sequences and the defined unique sequences.
-}
-\details{
 It also outputs the file "cross_table.tab", which summarises the number of each unique sequence in each file.
 }
