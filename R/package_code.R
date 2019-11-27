@@ -102,7 +102,9 @@ run_metaxa2<- function(db=NULL,input=NULL,out=NULL){
 
 #' Create a fasta file containing only unique sequences from your data
 #'
-#' The function also outputs the file "correspondence.tab", which details which of the unique sequences were in each of the original files
+#' The function also outputs the file "correspondence.tab", which details the correspondence between original sequences and the defined unique sequences.
+#'
+#' It also outputs the file "cross_table.tab", which summarises the number of each unique sequence in each file.
 #'
 #' @param list A character vector of fasta files that you want to include
 #' @param outdir The folder location in which to write the results
