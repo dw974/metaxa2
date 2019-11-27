@@ -121,14 +121,17 @@ unique_seqs <- function(list=NULL,outdir=NULL){
   #delete temporary files
   system(paste0("rm ",paste(fls,collapse = " ")))
   dna=Biostrings::readDNAStringSet(paste0(outdir,"/all_sequences.fasta"))
+  #Identify unique sequences and write to file
   unseq=unique(paste(dna))
   seqinr::write.fasta(sequences = as.list(unseq),names=as.list(paste0("seq_",1:length(unseq))),file.out = paste0(outdir,"/unique_sequences.fasta"))
 
+  #find correspondence between unique sequences and original data
   cor=lapply(1:length(list),function(x){
     dna=Biostrings::readDNAStringSet(list[x])
     return(data.frame(file=list[x],ID=names(dna),seq=match(paste(dna),unseq),stringsAsFactors = F))
   })
   df=do.call(rbind,cor)
-  table(df$file,df$seq)
+  write.table(df,paste0(outdir,"/correspondence.tab"),col.names = T,row.names = F,sep="\t")
+  write.table(table(df$file,df$seq),paste0(outdir,"/cross_table.tab"),col.names = T,row.names = T,sep="\t")
 
 }
