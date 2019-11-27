@@ -99,7 +99,7 @@ system("find *m* -type f -exec chmod +x {} +")
 #' @param out base name for output files (including folder location)
 run_metaxa2<- function(db=NULL,input=NULL,out=NULL){
   nc=parallel::detectCores()
-  system(paste0(system.file("extdata", "metaxa2", package = "metaxa2")," -o ",out," -f f --plus -g COI --cpu ",nc-2," -p ",db,"/HMMs/E.hmm -d",db,"/blast"))
+  system(paste0(system.file("extdata", "metaxa2", package = "metaxa2")," -o ",out," -f f -i ",input,"--plus -g COI --cpu ",nc-2," -p ",db,"/HMMs/E.hmm -d ",db,"/blast"))
 }
 
 #' Create a fasta file containing only unique sequences from your data
