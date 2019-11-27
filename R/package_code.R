@@ -1,3 +1,5 @@
+library(DECIPHER)
+
 #' Convert from Metaxa taxonomy format to a tabular, easy-to-read format
 #'
 #' @param metax File name: the file you wish to convert
