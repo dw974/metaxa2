@@ -16,7 +16,8 @@ Imports:
     DECIPHER,
     BiocManager,
     DECIPHER,
-    Biostrings
+    Biostrings,
+    seqinr
 RoxygenNote: 7.0.0
 BiocViews:
     DECIPHER,

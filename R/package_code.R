@@ -1,10 +1,3 @@
-library(stringr)
-library(dplyr)
-library(pbapply)
-library(parallel)
-library(DECIPHER)
-
-
 #' Convert from Metaxa taxonomy format to a tabular, easy-to-read format
 #'
 #' @param metax File name: the file you wish to convert
@@ -70,8 +63,6 @@ checkIDs <- function(metax=NULL,seq=NULL){
   }
 }
 
-
-
 #' Combine multiple fasta or taxonomy files into one
 #'
 #' @param list A character vector of files that you want to combine
@@ -88,7 +79,7 @@ combine_files <- function(list=NULL,out=NULL){
 #' @param name The name to give to the database
 make_db <- function(fasta=NULL,tax=NULL,outdir=NULL,name=NULL){
   nc=parallel::detectCores()
-  system(paste0(system.file("extdata", "metaxa2_dbb", package = "metaxa2")," -e ",fasta," -t ",tax," --cpu ",nc-2," --plus -g ",outdir,"/",name," -o ",name))
+  system(paste0(system.file("extdata", "metaxa2_dbb", package = "metaxa2")," -e ",fasta," -t ",tax," --cpu ",nc-2," --plus -o ",outdir,"/",name," -g ",name))
 }
 
 
@@ -97,4 +88,45 @@ make_db <- function(fasta=NULL,tax=NULL,outdir=NULL,name=NULL){
 setup_package <- function(){
 setwd(dirname(system.file("extdata", "metaxa2_dbb", package = "metaxa2")))
 system("find *m* -type f -exec chmod +x {} +")
+}
+
+#' Run metaxa2 on a dataset
+#'
+#' @param db location of the directory containing the metaxa2 database
+#' @param input input query fasta file
+#' @param out base name for output files (including folder location)
+run_metaxa2<- function(db=NULL,input=NULL,out=NULL){
+  nc=parallel::detectCores()
+  system(paste0(system.file("extdata", "metaxa2_dbb", package = "metaxa2")," -o ",out," -f f --plus -g COI --cpu ",nc-2," -p ",db,"/HMMs/E.hmm -d",db,"/blast"))
+}
+
+#' Create a fasta file containing only unique sequences from your data
+#'
+#' The function also outputs the file "correspondence.tab", which details which of the unique sequences were in each of the original files
+#'
+#' @param list A character vector of fasta files that you want to include
+#' @param outdir The folder location in which to write the results
+unique_seqs <- function(list=NULL,outdir=NULL){
+  #Files could be very big, so we'll start by writing a unique sequences file for each individual file.
+  fls=""
+  for (x in 1:length(list)){
+    dna=Biostrings::readDNAStringSet(list[x])
+    seqinr::write.fasta(sequences = as.list(paste(dna)),names=as.list(paste0("seq_",1:length(dna))),file.out = paste0(outdir,"/unique_",x,".fasta"))
+    fls=c(fls,paste0(outdir,"/unique_",x,".fasta"))
+  }
+  #Then concatenate them into a single file.
+  system(paste0("cat ",paste(fls,collapse = " ")," > ",outdir,"/all_sequences.fasta"))
+  #delete temporary files
+  system(paste0("rm ",paste(fls,collapse = " ")))
+  dna=Biostrings::readDNAStringSet(paste0(outdir,"/all_sequences.fasta"))
+  unseq=unique(paste(dna))
+  seqinr::write.fasta(sequences = as.list(unseq),names=as.list(paste0("seq_",1:length(unseq))),file.out = paste0(outdir,"/unique_sequences.fasta"))
+
+  cor=lapply(1:length(list),function(x){
+    dna=Biostrings::readDNAStringSet(list[x])
+    return(data.frame(file=list[x],ID=names(dna),seq=match(paste(dna),unseq),stringsAsFactors = F))
+  })
+  df=do.call(rbind,cor)
+  table(df$file,df$seq)
+
 }
