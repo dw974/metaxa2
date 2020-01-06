@@ -23,7 +23,11 @@ metax2tax <- function(metax=NULL,out=NULL){
   },cl = nc-2)
   print("Concatenating dataframe.")
   lst=do.call(rbind,lst)
+  if (out==F){
+  } else {
   write.table(lst,out,sep="\t",quote = F,row.names = F)
+  }
+  return(lst)
 }
 
 
