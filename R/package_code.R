@@ -5,7 +5,9 @@ library(dplyr)
 #' Convert from Metaxa taxonomy format to a tabular, easy-to-read format
 #'
 #' @param metax File name: the file you wish to convert
-#' @param out File name: the output file
+#' @param out File name: the output file. If this is set to "FALSE" no output file is written, and the tabular taxonomy format is returned.
+#'
+#' @return A data frame containing IDs and taxonomic classifications.
 metax2tax <- function(metax=NULL,out=NULL){
   tab=read.table(metax,sep="\t",colClasses = "character")
   colnames(tab)=c("ID","tax")
@@ -22,7 +24,7 @@ metax2tax <- function(metax=NULL,out=NULL){
                       genus=ifelse(length(which(str=="g"))>0,str[which(str=="g")+1],NA),
                       species=ifelse(length(which(str=="s"))>0,str[which(str=="s")+1],NA),
                       stringsAsFactors = F))
-  },cl = 2)
+  },cl = nc-2)
   print("Concatenating dataframe.")
   lst=do.call(rbind,lst)
   if (out==F){
@@ -165,6 +167,8 @@ summarise_db=function(tax=NULL){
   b=ggplot2::ggplot(df,aes(x=taxonomic.level,y=count,label=count,fill=taxonomic.level))+
     geom_col()+theme_void()+theme(axis.text = element_text(),legend.position="")
 
-  grid.arrange(a,b,heights=c(1,4))
+  c=ggplot(data.frame())+geom_blank()+theme_void()
+
+  grid.arrange(c,c,c,c,a,c,c,b,c,c,c,c,nrow=4,ncol=3,heights=c(0.5,1,4,0.5),widths=c(0.2,2,0.2))
 
 }
