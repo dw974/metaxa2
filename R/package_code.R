@@ -1,4 +1,6 @@
 library(DECIPHER)
+library(ggplot2)
+library(dplyr)
 
 #' Convert from Metaxa taxonomy format to a tabular, easy-to-read format
 #'
@@ -138,5 +140,31 @@ unique_seqs <- function(list=NULL,outdir=NULL){
   df=do.call(rbind,cor)
   write.table(df,paste0(outdir,"/correspondence.tab"),col.names = T,row.names = F,sep="\t")
   write.table(table(df$file,df$seq),paste0(outdir,"/cross_table.tab"),col.names = T,row.names = T,sep="\t")
+
+}
+
+
+summarise_db=function(tax=NULL){
+  df=data.frame(taxonomic.level=c("species","genera","families","orders","classes","phyla","kingdoms"),
+                count=c(length(unique(tax$species)),
+                length(unique(tax$genus)),
+                length(unique(tax$family)),
+                length(unique(tax$order)),
+                length(unique(tax$class)),
+                length(unique(tax$phylum)),
+                length(unique(tax$kingdom)))
+                  )
+  df$taxonomic.level=factor(df$taxonomic.level,levels = rev(c("species","genera","families","orders","classes","phyla","kingdoms")))
+
+  a=ggplot2::ggplot(df,aes(x=taxonomic.level,y=count,label=count,fill=taxonomic.level))+
+    ggchicklet::geom_chicklet(aes(y=1),radius = grid::unit(20,"pt"))+
+    geom_text(aes(y=0.5))+
+    theme_void()+
+    theme(axis.text.x = element_text(),axis.text.y = element_text(colour="white"),legend.position="")
+
+  b=ggplot2::ggplot(df,aes(x=taxonomic.level,y=count,label=count,fill=taxonomic.level))+
+    geom_col()+theme_void()+theme(axis.text = element_text(),legend.position="")
+
+  grid.arrange(a,b,heights=c(1,4))
 
 }
