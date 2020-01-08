@@ -24,7 +24,7 @@ metax2tax <- function(metax=NULL,out=NULL){
                       genus=ifelse(length(which(str=="g"))>0,str[which(str=="g")+1],NA),
                       species=ifelse(length(which(str=="s"))>0,str[which(str=="s")+1],NA),
                       stringsAsFactors = F))
-  },cl = nc-2)
+  },cl = 2)
   print("Concatenating dataframe.")
   lst=do.call(rbind,lst)
   if (out==F){
@@ -50,7 +50,11 @@ tax2metax <- function(tax=NULL,out=NULL){
                       stringsAsFactors = F))
   },cl=nc-2)
   lst=do.call(rbind,lst)
+  if (out==F){
+  } else {
   write.table(lst,out,sep="\t",quote = F,row.names = F,col.names = F)
+  }
+  return(tab)
 }
 
 
@@ -89,6 +93,7 @@ combine_files <- function(list=NULL,out=NULL){
 #' @param name The name to give to the database
 make_db <- function(fasta=NULL,tax=NULL,outdir=NULL,name=NULL){
   nc=parallel::detectCores()
+  system(paste0("mkdir ",outdir,"/",name))
   system(paste0(system.file("extdata", "metaxa2_dbb", package = "metaxa2")," -e ",fasta," -t ",tax," --cpu ",nc-2," --plus -o ",outdir,"/",name," -g ",name))
 }
 
@@ -107,7 +112,7 @@ system("find *m* -type f -exec chmod +x {} +")
 #' @param out base name for output files (including folder location)
 run_metaxa2<- function(db=NULL,input=NULL,out=NULL){
   nc=parallel::detectCores()
-  system(paste0(system.file("extdata", "metaxa2", package = "metaxa2")," -o ",out," -f f -i ",input,"--plus -g COI --cpu ",nc-2," -p ",db,"/HMMs/E.hmm -d ",db,"/blast"))
+  system(paste0(system.file("extdata", "metaxa2", package = "metaxa2")," -o ",out," -f f -i ",input," --plus -g COI --cpu ",nc-2," -p ",db,"/HMMs/ -d ",db,"/blast"))
 }
 
 #' Create a fasta file containing only unique sequences from your data
