@@ -24,7 +24,7 @@ metax2tax <- function(metax=NULL,out=NULL){
                       genus=ifelse(length(which(str=="g"))>0,str[which(str=="g")+1],NA),
                       species=ifelse(length(which(str=="s"))>0,str[which(str=="s")+1],NA),
                       stringsAsFactors = F))
-  },cl = 2)
+  },cl = nc-2)
   print("Concatenating dataframe.")
   lst=do.call(rbind,lst)
   if (out==F){
