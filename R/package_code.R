@@ -24,7 +24,7 @@ metax2tax <- function(metax=NULL,out=NULL){
                       genus=ifelse(length(which(str=="g"))>0,str[which(str=="g")+1],NA),
                       species=ifelse(length(which(str=="s"))>0,str[which(str=="s")+1],NA),
                       stringsAsFactors = F))
-  },cl = nc-2)
+  },cl = 2)
   print("Concatenating dataframe.")
   lst=do.call(rbind,lst)
   if (out==F){
@@ -112,7 +112,7 @@ system("find *m* -type f -exec chmod +x {} +")
 #' @param out base name for output files (including folder location)
 run_metaxa2<- function(db=NULL,input=NULL,out=NULL){
   nc=parallel::detectCores()
-  system(paste0(system.file("extdata", "metaxa2", package = "metaxa2")," -o ",out," -f f -i ",input," --plus -g COI --cpu ",nc-2," -p ",db,"/HMMs/ -d ",db,"/blast"))
+  system(paste0(system.file("extdata", "metaxa2", package = "metaxa2")," -o ",out," -f f -i ",input," --plus -g COI --cpu ",nc-2," -p ",db,"/HMMs/E.hmm -d ",db,"/blast"))
 }
 
 #' Create a fasta file containing only unique sequences from your data
@@ -167,7 +167,8 @@ summarise_db=function(tax=NULL){
     ggchicklet::geom_chicklet(aes(y=1),radius = grid::unit(20,"pt"))+
     geom_text(aes(y=0.5))+
     theme_void()+
-    theme(axis.text.x = element_text(),axis.text.y = element_text(colour="white"),legend.position="")
+    theme(axis.text.x = element_text(),axis.text.y = element_text(colour="white"),legend.position="")+
+    ggtitle("Number of unique sequences assigned to different taxa")
 
   b=ggplot2::ggplot(df,aes(x=taxonomic.level,y=count,label=count,fill=taxonomic.level))+
     geom_col()+theme_void()+theme(axis.text = element_text(),legend.position="")
