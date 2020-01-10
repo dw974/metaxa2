@@ -189,6 +189,8 @@ summarise_metaxa_results=function(results=NULL,correspondence=NULL){
   tab=read.table(results,header=F,stringsAsFactors = F,sep="\t")
   colnames(tab)=c("ID","tax","ident","length","RS")
   nc=parallel::detectCores()
+  #Importing taxonomic results into dataframe format
+  print("Importing taxonomic results into dataframe format")
   lst=pbapply::pblapply(1:length(tab$tax),function(x){
     str=stringr::str_split(tab$tax[x],";|__",simplify = T)
     return(data.frame(ID=tab$ID[x],
@@ -222,21 +224,36 @@ summarise_metaxa_results=function(results=NULL,correspondence=NULL){
     ggchicklet::geom_chicklet(ggplot2::aes(y=1),radius = grid::unit(20,"pt"))+
     geom_text(aes(y=0.5))+
     theme_void()+
-    theme(axis.text.x = element_text(),axis.text.y = element_text(colour="white"),legend.position="")
+    theme(axis.text.x = element_text(),axis.text.y = element_text(colour="white"),legend.position="")+
+    ggtitle("Classification summary: number and proportion of unique sequences classified to each taxonomic level.")
   b=ggplot2::ggplot(df,ggplot2::aes(x=taxonomic.level,y=count,label=count,fill=type))+
     geom_col(position="stack")+theme_void()+theme(axis.text = element_text(),legend.position="")+
     theme(legend.position="bottom")+
     scale_fill_manual(values = c("green","grey50"),name="")
   c=ggplot(data.frame())+geom_blank()+theme_void()
   gridExtra::grid.arrange(c,c,c,c,a,c,c,b,c,c,c,c,nrow=4,ncol=3,heights=c(0.5,1,4,0.5),widths=c(0.2,2,0.2))
-  return(lst)
+
+  print("Crossing classifications with original data")
   if (!is.null(correspondence)){
-    cor=as.data.frame(as.table(as.matrix(read.table(correspondence))),stringsAsFactors = F)
+    cor=as.matrix(read.table(correspondence))
+    cor=cor[,!apply(cor,2,sum)==0]
+    cor=as.data.frame(as.table(cor),stringsAsFactors = F)
     colnames(cor)=c("file","seq","count")
     cor=dplyr::left_join(cor,lst,by=c("seq"="ID"))
   }
-  cor$taxon=paste0(cor$kingdom,cor$phylum,cor$class,cor$order,cor$family,cor$genus,cor$species,collapse = "::")
-  xt=xtabs(count~file+taxon,data=cor)
-  return(lst)
+  cor$taxon=sapply(1:dim(cor)[1],function(x) paste(cor$kingdom[x],cor$phylum[x],cor$class[x],cor$order[x],cor$family[x],cor$genus[x],cor$species[x],collapse = "::"))
+  taxsum= cor %>% group_by(taxon) %>% summarise(count=sum(count))
+  taxsum$taxon=factor(taxsum$taxon,levels=taxsum$taxon[order(taxsum$count,decreasing = F)])
+  ggplot2::ggplot(taxsum[order(taxsum$count,decreasing = T)[1:20],])+geom_col(aes(x=taxon,y=count,fill=taxon))+coord_flip()+theme(legend.position = "none")
+
+  ggplot(cor)+geom_col(aes(x=basename(file),y=count,fill=order))+coord_flip()
+
+  xt=as.matrix(xtabs(count~taxon+file,data=cor))
+  xt=t(xt)
+  xt_f <- xt[,apply(xt, 2, var, na.rm=TRUE) != 0]
+  pc=prcomp(xt_f,center=T,scale.=F)
+  ggbiplot(pc, choices = 1:2,obs.scale = 1, var.scale = 1, varname.size = 3, labels.size=3, ellipse = TRUE, circle = TRUE,var.axes=F,labels=basename(rownames(pc$x)))
+
+  return(xt)
 }
 
