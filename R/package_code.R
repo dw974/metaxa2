@@ -29,7 +29,7 @@ metax2tax <- function(metax=NULL,out=NULL){
   lst=do.call(rbind,lst)
   if (out==F){
   } else {
-  write.table(lst,out,sep="\t",quote = F,row.names = F)
+    write.table(lst,out,sep="\t",quote = F,row.names = F)
   }
   return(lst)
 }
@@ -42,7 +42,7 @@ metax2tax <- function(metax=NULL,out=NULL){
 tax2metax <- function(tax=NULL,out=NULL){
   tab=read.table(tax,sep="\t",header=T,colClasses = "character")
   nc=parallel::detectCores()
-    print("Converting taxon formats to metaxa format, can take a while...")
+  print("Converting taxon formats to metaxa format, can take a while...")
   lst=pbapply::pblapply(1:length(tab$ID),function(x){
     tmp=tab[x,!is.na(tab[x,])]
     return(data.frame(ID=tmp$ID,
@@ -52,7 +52,7 @@ tax2metax <- function(tax=NULL,out=NULL){
   lst=do.call(rbind,lst)
   if (out==F){
   } else {
-  write.table(lst,out,sep="\t",quote = F,row.names = F,col.names = F)
+    write.table(lst,out,sep="\t",quote = F,row.names = F,col.names = F)
   }
   return(tab)
 }
@@ -68,12 +68,12 @@ checkIDs <- function(metax=NULL,seq=NULL){
   dna=Biostrings::readDNAStringSet(seq)
   names(dna)=gsub(" ","",names(dna))
   if (length(intersect(tab$ID,names(dna)))==length(tab$ID) & length(intersect(tab$ID,names(dna)))==length(names(dna))){
-  print("Perfect match between IDs. Proceed to database construction.")
+    print("Perfect match between IDs. Proceed to database construction.")
   } else {
-  print("IDs in taxonomy but not present in sequences:")
-  print(setdiff(tab$ID,names(dna)))
-  print("IDs in sequences but not present in taxonomy:")
-  print(setdiff(names(dna),tab$ID))
+    print("IDs in taxonomy but not present in sequences:")
+    print(setdiff(tab$ID,names(dna)))
+    print("IDs in sequences but not present in taxonomy:")
+    print(setdiff(names(dna),tab$ID))
   }
 }
 
@@ -95,14 +95,17 @@ make_db <- function(fasta=NULL,tax=NULL,outdir=NULL,name=NULL){
   nc=parallel::detectCores()
   system(paste0("mkdir ",outdir,"/",name))
   system(paste0(system.file("extdata", "metaxa2_dbb", package = "metaxa2")," -e ",fasta," -t ",tax," --cpu ",nc-2," --plus -o ",outdir,"/",name," -g ",name))
+
+  ## PUTS DATABASE IN WEIRD LOCATION... NEED TO COPY IT OUT AGAIN.... SOMETHING LIKE
+  ##system(paste0("cp -R ",system.file("extdata", "new_database", package = "metaxa2")," ",outdir))
 }
 
 
 #' Execute this function the first time you install the package
 #'
 setup_package <- function(){
-setwd(dirname(system.file("extdata", "metaxa2_dbb", package = "metaxa2")))
-system("find *m* -type f -exec chmod +x {} +")
+  setwd(dirname(system.file("extdata", "metaxa2_dbb", package = "metaxa2")))
+  system("find *m* -type f -exec chmod +x {} +")
 }
 
 #' Run metaxa2 on a dataset
@@ -112,7 +115,8 @@ system("find *m* -type f -exec chmod +x {} +")
 #' @param out base name for output files (including folder location)
 run_metaxa2<- function(db=NULL,input=NULL,out=NULL){
   nc=parallel::detectCores()
-  system(paste0(system.file("extdata", "metaxa2", package = "metaxa2")," -o ",out," -f f -i ",input," --plus -g COI --cpu ",nc-2," -p ",db,"/HMMs/E.hmm -d ",db,"/blast"))
+  system(paste0(system.file("extdata", "metaxa2", package = "metaxa2")," -o ",out," -f f -i ",input," --plus -g COI --cpu ",nc-2," -p ",db,"/HMMs/ -d ",db,"/blast"))
+  system(paste0(system.file("extdata", "metaxa2_ttt", package = "metaxa2")," -o ",out,"_tax -i ",out,".taxonomy.txt"))
 }
 
 #' Create a fasta file containing only unique sequences from your data
@@ -145,8 +149,10 @@ unique_seqs <- function(list=NULL,outdir=NULL){
     return(data.frame(file=list[x],ID=names(dna),seq=match(paste(dna),unseq),stringsAsFactors = F))
   })
   df=do.call(rbind,cor)
+  tmp=as.matrix(table(df$file,df$seq))
+  colnames(tmp)=as.list(paste0("seq_",1:length(unseq)))
   write.table(df,paste0(outdir,"/correspondence.tab"),col.names = T,row.names = F,sep="\t")
-  write.table(table(df$file,df$seq),paste0(outdir,"/cross_table.tab"),col.names = T,row.names = T,sep="\t")
+  write.table(tmp,paste0(outdir,"/cross_table.tab"),col.names=T,row.names = T,sep="\t")
 
 }
 
@@ -154,13 +160,13 @@ unique_seqs <- function(list=NULL,outdir=NULL){
 summarise_db=function(tax=NULL){
   df=data.frame(taxonomic.level=c("species","genera","families","orders","classes","phyla","kingdoms"),
                 count=c(length(unique(tax$species)),
-                length(unique(tax$genus)),
-                length(unique(tax$family)),
-                length(unique(tax$order)),
-                length(unique(tax$class)),
-                length(unique(tax$phylum)),
-                length(unique(tax$kingdom)))
-                  )
+                        length(unique(tax$genus)),
+                        length(unique(tax$family)),
+                        length(unique(tax$order)),
+                        length(unique(tax$class)),
+                        length(unique(tax$phylum)),
+                        length(unique(tax$kingdom)))
+  )
   df$taxonomic.level=factor(df$taxonomic.level,levels = rev(c("species","genera","families","orders","classes","phyla","kingdoms")))
 
   a=ggplot2::ggplot(df,aes(x=taxonomic.level,y=count,label=count,fill=taxonomic.level))+
@@ -175,6 +181,62 @@ summarise_db=function(tax=NULL){
 
   c=ggplot(data.frame())+geom_blank()+theme_void()
 
-  grid.arrange(c,c,c,c,a,c,c,b,c,c,c,c,nrow=4,ncol=3,heights=c(0.5,1,4,0.5),widths=c(0.2,2,0.2))
+  gridExtra::grid.arrange(c,c,c,c,a,c,c,b,c,c,c,c,nrow=4,ncol=3,heights=c(0.5,1,4,0.5),widths=c(0.2,2,0.2))
 
 }
+
+summarise_metaxa_results=function(results=NULL,correspondence=NULL){
+  tab=read.table(results,header=F,stringsAsFactors = F,sep="\t")
+  colnames(tab)=c("ID","tax","ident","length","RS")
+  nc=parallel::detectCores()
+  lst=pbapply::pblapply(1:length(tab$tax),function(x){
+    str=stringr::str_split(tab$tax[x],";|__",simplify = T)
+    return(data.frame(ID=tab$ID[x],
+                      kingdom=ifelse(length(which(str=="k"))>0,str[which(str=="k")+1],NA),
+                      phylum=ifelse(length(which(str=="p"))>0,str[which(str=="p")+1],NA),
+                      class=ifelse(length(which(str=="c"))>0,str[which(str=="c")+1],NA),
+                      order=ifelse(length(which(str=="o"))>0,str[which(str=="o")+1],NA),
+                      family=ifelse(length(which(str=="f"))>0,str[which(str=="f")+1],NA),
+                      genus=ifelse(length(which(str=="g"))>0,str[which(str=="g")+1],NA),
+                      species=ifelse(length(which(str=="s"))>0,str[which(str=="s")+1],NA),
+                      stringsAsFactors = F))
+  },cl = nc-2)
+  lst=do.call(rbind,lst)
+  df=data.frame(taxonomic.level=factor(c("species","genus","family","order","class","phylum","kingdom","species","genus","family","order","class","phylum","kingdom"),levels=rev(c("species","genus","family","order","class","phylum","kingdom"))),
+                count=c(sum(!is.na(lst$species)),
+                        sum(!is.na(lst$genus)),
+                        sum(!is.na(lst$family)),
+                        sum(!is.na(lst$order)),
+                        sum(!is.na(lst$class)),
+                        sum(!is.na(lst$phylum)),
+                        sum(!is.na(lst$kingdom)),
+                        sum(is.na(lst$species)),
+                        sum(is.na(lst$genus)),
+                        sum(is.na(lst$family)),
+                        sum(is.na(lst$order)),
+                        sum(is.na(lst$class)),
+                        sum(is.na(lst$phylum)),
+                        sum(is.na(lst$kingdom))),
+                type=factor(c("classified","classified","classified","classified","classified","classified","classified","unclassified","unclassified","unclassified","unclassified","unclassified","unclassified","unclassified")),levels=c("classified","unclassified"))
+  a=ggplot2::ggplot(subset(df,df$type=="classified"),ggplot2::aes(x=taxonomic.level,y=count,label=count,fill=taxonomic.level))+
+    ggchicklet::geom_chicklet(ggplot2::aes(y=1),radius = grid::unit(20,"pt"))+
+    geom_text(aes(y=0.5))+
+    theme_void()+
+    theme(axis.text.x = element_text(),axis.text.y = element_text(colour="white"),legend.position="")
+  b=ggplot2::ggplot(df,ggplot2::aes(x=taxonomic.level,y=count,label=count,fill=type))+
+    geom_col(position="stack")+theme_void()+theme(axis.text = element_text(),legend.position="")+
+    theme(legend.position="bottom")+
+    scale_fill_manual(values = c("green","grey50"),name="")
+  c=ggplot(data.frame())+geom_blank()+theme_void()
+  gridExtra::grid.arrange(c,c,c,c,a,c,c,b,c,c,c,c,nrow=4,ncol=3,heights=c(0.5,1,4,0.5),widths=c(0.2,2,0.2))
+  return(lst)
+  if (!is.null(correspondence)){
+    cor=as.data.frame(as.table(as.matrix(read.table(correspondence))),stringsAsFactors = F)
+    colnames(cor)=c("file","seq","count")
+    cor=dplyr::left_join(cor,lst,by=c("seq"="ID"))
+  }
+  cor$taxon=paste0(cor$kingdom,cor$phylum,cor$class,cor$order,cor$family,cor$genus,cor$species,collapse = "::")
+  xt=xtabs(count~file+taxon,data=cor)
+  return(lst)
+}
+
