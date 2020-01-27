@@ -191,7 +191,7 @@ summarise_metaxa_results=function(results=NULL,correspondence=NULL){
   nc=parallel::detectCores()
   #Importing taxonomic results into dataframe format
   print("Importing taxonomic results into dataframe format")
-  lst=pbapply::pblapply(1:length(tab$tax),function(x){
+  lst=lapply(1:length(tab$tax),function(x){
     str=stringr::str_split(tab$tax[x],";|__",simplify = T)
     return(data.frame(ID=tab$ID[x],
                       kingdom=ifelse(length(which(str=="k"))>0,str[which(str=="k")+1],NA),
@@ -202,7 +202,7 @@ summarise_metaxa_results=function(results=NULL,correspondence=NULL){
                       genus=ifelse(length(which(str=="g"))>0,str[which(str=="g")+1],NA),
                       species=ifelse(length(which(str=="s"))>0,str[which(str=="s")+1],NA),
                       stringsAsFactors = F))
-  },cl = nc-2)
+  })
   lst=do.call(rbind,lst)
   df=data.frame(taxonomic.level=factor(c("species","genus","family","order","class","phylum","kingdom","species","genus","family","order","class","phylum","kingdom"),levels=rev(c("species","genus","family","order","class","phylum","kingdom"))),
                 count=c(sum(!is.na(lst$species)),
@@ -242,9 +242,9 @@ summarise_metaxa_results=function(results=NULL,correspondence=NULL){
     cor=dplyr::left_join(cor,lst,by=c("seq"="ID"))
   }
   cor$taxon=sapply(1:dim(cor)[1],function(x) paste(cor$kingdom[x],cor$phylum[x],cor$class[x],cor$order[x],cor$family[x],cor$genus[x],cor$species[x],collapse = "::"))
-  taxsum= cor %>% group_by(taxon) %>% summarise(count=sum(count))
+  taxsum= cor %>% group_by(taxon) %>% dplyr::summarise(count=sum(as.numeric(count)))
   taxsum$taxon=factor(taxsum$taxon,levels=taxsum$taxon[order(taxsum$count,decreasing = F)])
-  ggplot2::ggplot(taxsum[order(taxsum$count,decreasing = T)[1:20],])+geom_col(aes(x=taxon,y=count,fill=taxon))+coord_flip()+theme(legend.position = "none")
+  ggplot2::ggplot(taxsum[order(taxsum$count,decreasing = T)[1:50],])+geom_col(aes(x=taxon,y=count,fill=taxon))+coord_flip()+theme(legend.position = "none")
 
   ggplot(cor)+geom_col(aes(x=basename(file),y=count,fill=order))+coord_flip()
 
